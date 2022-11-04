@@ -28,15 +28,22 @@ METADATA
 
   parameters = <<PARAMETERS
 
-	{
-  "logAnalytics": {
-    "type": "String",
-    "metadata": {
-      "displayName": "Log Analytics workspace",
-      "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
-      "strongType": "omsWorkspace"
-    }
-  },
+		{
+		"eventHubAuthorizationRuleId": {
+			"type": "String",
+			"metadata": {
+				"displayName": "Event Hub Shared Access Policy Authorization Rule Id",
+				"description": "Specify Event Hub Shared Access Policy Authorization Rule Id"
+			}
+		},
+		"Location": {
+			"type": "String",
+			"metadata": {
+				"displayName": "Resource Location",
+				"description": "Resource Location must be the same as the Event Hub Location",
+				"strongType": "location"
+			}
+		},
   "effect": {
     "type": "String",
     "defaultValue": "DeployIfNotExists",
@@ -49,7 +56,7 @@ METADATA
       "description": "Enable or disable the execution of the policy"
     }
   },
-  "profileName": {
+   "profileName": {
     "type": "String",
     "defaultValue": "setbypolicy",
     "metadata": {
@@ -109,9 +116,13 @@ PARAMETERS
             "equals": "true"
           },
           {
-            "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
-            "equals": "[parameters('logAnalytics')]"
-          }
+						"field": "Microsoft.Insights/diagnosticSettings/eventHubAuthorizationRuleId",
+						"matchInsensitively": "[parameters('eventHubAuthorizationRuleId')]"
+					},
+          {
+				"field": "location",
+				"equals": "[parameters('Location')]"
+			}
         ]
       },
       "roleDefinitionIds": [
@@ -128,13 +139,13 @@ PARAMETERS
               "resourceName": {
                 "type": "String"
               },
-              "logAnalytics": {
-                "type": "String"
-              },
               "location": {
                 "type": "String"
               },
-              "profileName": {
+"eventHubAuthorizationRuleId": {
+								"type": "string"
+							},
+               "profileName": {
                 "type": "String"
               },
               "metricsEnabled": {
@@ -153,7 +164,7 @@ PARAMETERS
                 "location": "[parameters('location')]",
                 "dependsOn": [],
                 "properties": {
-                  "workspaceId": "[parameters('logAnalytics')]",
+                  "eventHubAuthorizationRuleId": "[parameters('eventHubAuthorizationRuleId')]",
                   "metrics": [
                     {
                       "category": "AllMetrics",
@@ -181,12 +192,12 @@ PARAMETERS
             "outputs": {}
           },
           "parameters": {
-            "logAnalytics": {
-              "value": "[parameters('logAnalytics')]"
-            },
-            "location": {
-              "value": "[field('location')]"
-            },
+            "eventHubAuthorizationRuleId": {
+							"value": "[parameters('eventHubAuthorizationRuleId')]"
+						},
+						"Location": {
+							"value": "[field('location')]"
+						},
             "resourceName": {
               "value": "[field('name')]"
             },
@@ -212,17 +223,17 @@ POLICY_RULE
 data "azurerm_subscription" "current" {}
 
 resource "azurerm_subscription_policy_assignment" "assign_policy" {
-  name                 = "policy-assignment-acr"
+  name                 = "policy-assignment-acr-event"
   policy_definition_id = azurerm_policy_definition.storage_diaglogs.id
   subscription_id      = data.azurerm_subscription.current.id
   location             = "eastus2"
   parameters           = <<PARAMETERS
     {
-      "profileName": {
-        "value": "diag-logs-metrics-logws"
+      "eventHubAuthorizationRuleId": {
+        "value": "/subscriptions/f3d20c9f-3cb5-45df-b6a8-32f7f4e3d1b6/resourceGroups/sample-1/providers/Microsoft.EventHub/namespaces/eventnamespaceankur/authorizationRules/RootManageSharedAccessKey"
       },
-      "logAnalytics": {
-        "value": "/subscriptions/f3d20c9f-3cb5-45df-b6a8-32f7f4e3d1b6/resourcegroups/sample-1/providers/microsoft.operationalinsights/workspaces/samplelaws"
+	     "Location": {
+        "value": "eastus2"
       }
     }
   PARAMETERS
