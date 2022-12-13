@@ -3,13 +3,13 @@ provider "azurerm" {
   features {}
 }
 
-data "azurerm_management_group" "baringsroot" {
+data "azurerm_management_group" "mysetexp" {
   display_name = "ankur management group"
 }
 
 # My Provider finish
 
-data "azurerm_user_assigned_identity" "mi-cloudops-azpolicy" {
+data "azurerm_user_assigned_identity" "mycloudopsazpolicy" {
   name                = "MyIdentity"
   resource_group_name = "sample-1"
 }
@@ -229,7 +229,7 @@ resource "azurerm_subscription_policy_assignment" "assign_policy" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [data.azurerm_user_assigned_identity.mi-cloudops-azpolicy.id]
+    identity_ids = [data.azurerm_user_assigned_identity.mycloudopsazpolicy.id]
 
   }
 
